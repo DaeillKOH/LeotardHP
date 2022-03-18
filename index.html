@@ -4,25 +4,6 @@
         <link rel="stylesheet" href="style.css" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
-        <script>
-
-
-    $(function(){
-    $('.right').mouseenter(function(){
-    $('.test1').text(<?php
-    $conn = mysqli_connect("localhost", "root", "infinite2020" , "wordpress");
-    $sql = "SELECT `post_name`, `guid`,`post_title` FROM `wp_posts` WHERE `post_name` LIKE 'k%' AND `post_type` = 'attachment' ORDER BY `wp_posts`.`post_name` ASC LIMIT 6" ;
-    $result = mysqli_query($conn, $sql);
-    $row = mysqli_fetch_array($result);
-    echo $row["post_title"]; ?>);
-    });
-    $('.right').mouseleave(function(){
-    $('.test1').text('生地を選択してください');
-    });
-    });
-        </script>
-
-
         
     </head>
 
@@ -37,13 +18,12 @@
             </div>
             <div class="right">
                 <?php 
-             $conn = mysqli_connect("localhost", "root", "infinite2020" , "wordpress");
-             $sql = "SELECT `post_name`, `guid`,`post_title` FROM `wp_posts` WHERE `post_name` LIKE 'k%' AND `post_type` = 'attachment' ORDER BY `wp_posts`.`post_name` ASC LIMIT 6" ;
-             $result = mysqli_query($conn, $sql);
+                $conn = mysqli_connect("localhost", "root", "infinite2020" , "wordpress");
+                $sql = "SELECT `post_name`, `guid`,`post_title` FROM `wp_posts` WHERE `post_name` LIKE 'k%' AND `post_type` = 'attachment' ORDER BY `wp_posts`.`post_name`" ;
+                $result = mysqli_query($conn, $sql);
                 while($row = mysqli_fetch_array($result)){
                 echo "<img id='".$row["post_name"]."' value='".$row["post_title"]."' src='".$row["guid"]."'>";
                 }
-                mysqli_close($conn);
              ?>
             </div>
         </div>
@@ -54,13 +34,10 @@
             </div>
             <div class="right">
                 <?php 
-             $conn = mysqli_connect("localhost", "root", "infinite2020" , "wordpress");
-             $sql = "SELECT `post_name`, `guid`,`post_title` FROM `wp_posts` WHERE `post_name` LIKE 'k%' AND `post_type` = 'attachment' ORDER BY `wp_posts`.`post_name` ASC LIMIT 6" ;
-             $result = mysqli_query($conn, $sql);
+                $result = mysqli_query($conn, $sql);
                 while($row = mysqli_fetch_array($result)){
                 echo "<img id='".$row["post_name"]."' value='".$row["post_title"]."' src='".$row["guid"]."'>";
                 }
-                mysqli_close($conn);
              ?>
                </div>
         </div>
@@ -74,6 +51,8 @@
             <div id="option2"></div>
             <div id="option3"></div>
 
+            
+
           
             <center>
               <div class="checks">
@@ -85,10 +64,42 @@
               <label for="size3">L</label>
             </div>
             
-            <div class="test1"><?php echo "its test" ?></div>
+            <div class="test1">
+                <?php 
+                $meta_value_sql = "SELECT meta_value FROM wp_postmeta as pm 
+                INNER JOIN wp_posts as p ON pm.post_id = p.id 
+                WHERE p.post_type = 'product_variation' 
+                AND p.post_title = 'パタン5'
+                AND p.post_excerpt = 'サイズ: L, 生地: g-5, 生地2: g-5'
+                AND pm.meta_key = '_regular_price'
+                ";
+                $result = mysqli_query($conn, $meta_value_sql);
+                $row = mysqli_fetch_array($result);
+
+                echo  $row['meta_value']; 
+         ?>
+
+
+            </div>
 
             <div class="frame">
-              <div class="box" id="qty"></div>
+              <div class="box" id="qty">
+                  
+                <?php 
+                $meta_value_sql = "
+                SELECT meta_value FROM wp_postmeta as pm 
+                INNER JOIN wp_posts as p ON pm.post_id = p.id 
+                WHERE p.post_type = 'product_variation' 
+                AND p.post_title = 'パタン5'
+                AND p.post_excerpt = 'サイズ: L, 生地: g-5, 生地2: g-5'
+                AND pm.meta_key = '_regular_price'
+                ";
+                $result = mysqli_query($conn, $meta_value_sql);
+                $row = mysqli_fetch_array($result);
+
+                echo  $row['meta_value']; 
+         ?>
+              </div>
               
             </div>
 
@@ -96,11 +107,11 @@
         <button id="add">確認</button>
         <button id="addtocart" class="hey">この組み合わせで購入</button>
 
-        <form action="new.php" method="post" >
-            <!--$_POST["test"]-->
+        <!--<form action="new.php" method="post" >
+            $_POST["test"]
             <input type="hidden" name="test" id="test"><br>
             <input id="addcart" type="submit" value="전송">
-            </form>
+            </form>-->
 
       </center>
       
@@ -174,7 +185,7 @@ $('#add').on('click',function(){
     var c2 = $("#option2").attr("class");
     var sized = $('input[name=size]:checked').val();
 
-    var i = 6329;
+    var i = 6329;   
 
   var result =(function(){
     if(c1 == 'k01' && c2 == 'k01' && sized == 's') return i;
