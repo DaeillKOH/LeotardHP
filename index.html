@@ -1,3 +1,28 @@
+
+<?php 
+$conn = mysqli_connect("localhost", "root", "infinite2020" , "wordpress");
+$sql_base_up = "
+SELECT guid,post_name,post_title FROM `wp_posts` as p 
+INNER JOIN wp_termmeta as tm ON p.ID = tm.meta_value
+INNER JOIN wp_term_taxonomy tx ON tm.term_id = tx.term_id
+WHERE p.post_type = 'attachment' 
+AND tm.meta_key = 'shopengine_image'
+AND tx.taxonomy = 'pa_fabric'
+";
+$sql_base_down = "
+SELECT guid,post_name,post_title FROM `wp_posts` as p 
+INNER JOIN wp_termmeta as tm ON p.ID = tm.meta_value
+INNER JOIN wp_term_taxonomy tx ON tm.term_id = tx.term_id
+WHERE p.post_type = 'attachment' 
+AND tm.meta_key = 'shopengine_image'
+AND tx.taxonomy = 'pa_fabric2'
+";
+
+?>
+
+<!DOCTYPE html>
+
+
 <html>
     <head>
         <title> web server test 1 </title>
@@ -18,11 +43,9 @@
             </div>
             <div class="right">
                 <?php 
-                $conn = mysqli_connect("localhost", "root", "infinite2020" , "wordpress");
-                $sql = "SELECT `post_name`, `guid`,`post_title` FROM `wp_posts` WHERE `post_name` LIKE 'k%' AND `post_type` = 'attachment' ORDER BY `wp_posts`.`post_name`" ;
-                $result = mysqli_query($conn, $sql);
-                while($row = mysqli_fetch_array($result)){
-                echo "<img id='".$row["post_name"]."' value='".$row["post_title"]."' src='".$row["guid"]."'>";
+                $result = mysqli_query($conn, $sql_base_up);
+                while($row = mysqli_fetch_row($result)){
+                echo "<img id='".$row[1]."' value='".$row[2]."' src='".$row[0]."'>";
                 }
              ?>
             </div>
@@ -34,10 +57,10 @@
             </div>
             <div class="right">
                 <?php 
-                $result = mysqli_query($conn, $sql);
-                while($row = mysqli_fetch_array($result)){
-                echo "<img id='".$row["post_name"]."' value='".$row["post_title"]."' src='".$row["guid"]."'>";
-                }
+                $result = mysqli_query($conn, $sql_base_down);
+                while($row = mysqli_fetch_row($result)){
+                echo "<img id='".$row[1]."' value='".$row[2]."' src='".$row[0]."'>";
+            }
              ?>
                </div>
         </div>
@@ -46,74 +69,79 @@
 
             <canvas id="canvas" width="800" height="500"></canvas>
             <canvas id="canvas-compose" width="800" height="500" ></canvas>
-
-            <div id="option1"></div>
-            <div id="option2"></div>
-            <div id="option3"></div>
-
+            
             
 
           
             <center>
-              <div class="checks">
-              <input type="radio" id="size1" name="size" value="s">
-              <label for="size1">S </label>
-              <input type="radio" id="size2"name="size" value="m">
-              <label for="size2">M </label>
-              <input type="radio" id="size3" name="size" value="l">
-              <label for="size3">L</label>
-            </div>
+              <!--
+                <div id="option12" name="option1"></div>
+            <div id="option23" name="option2"></div>
+            <div id="option34" name="option3"></div>-->
+        <script>
+        function SubForm (){
+    $.ajax({
+        url: 'test.php',
+        type: 'post',
+        data: $('#formupload').serialize(),
+        success: function(){
+            alert("worked");
+        }
+    });
+}
+
+        </script>
+
+
+            <form id="formupload" name="form1" method="post" action="test.php" >
+                <input name="size" type="radio" value="s" class="size"> S
+	            <input name="size" type="radio" value="m" class="size"> M
+	            <input name="size" type="radio" value="l"class="size"> L
+                <input type="hidden" id= "option1" name="option1">
+                <input type="hidden" id= "option2" name="option2">
+                <input type="hidden" id= "option3" name="option3">
+                <button  type ="submit" onclick="function php_test(event)">確認</button>
+            </form>
             
-            <div class="test1">
-                <?php 
-                $meta_value_sql = "SELECT meta_value FROM wp_postmeta as pm 
-                INNER JOIN wp_posts as p ON pm.post_id = p.id 
-                WHERE p.post_type = 'product_variation' 
-                AND p.post_title = 'パタン5'
-                AND p.post_excerpt = 'サイズ: L, 生地: g-5, 生地2: g-5'
-                AND pm.meta_key = '_regular_price'
-                ";
-                $result = mysqli_query($conn, $meta_value_sql);
-                $row = mysqli_fetch_array($result);
-
-                echo  $row['meta_value']; 
-         ?>
-
-
-            </div>
 
             <div class="frame">
               <div class="box" id="qty">
-                  
-                <?php 
-                $meta_value_sql = "
-                SELECT meta_value FROM wp_postmeta as pm 
-                INNER JOIN wp_posts as p ON pm.post_id = p.id 
-                WHERE p.post_type = 'product_variation' 
-                AND p.post_title = 'パタン5'
-                AND p.post_excerpt = 'サイズ: L, 生地: g-5, 生地2: g-5'
-                AND pm.meta_key = '_regular_price'
-                ";
-                $result = mysqli_query($conn, $meta_value_sql);
-                $row = mysqli_fetch_array($result);
-
-                echo  $row['meta_value']; 
-         ?>
+                
+                <!--<?php echo $VALUE ?>-->
               </div>
               
             </div>
 
+            <script>
+                function php_test(event){
+                    event.preventDefault();
+                    $.ajax({
+         type: 'POST',    
+         url: "test.php",   //전송할 url
+         data: $('#formupload').serialize(),    //form id를 입력하자
+         success: function(response) {   //성공했을시의 동작.
+             alert ("Ok dear");
+             //$("#commentList").append("Name:" + $("#name").val() + "comment:" + $("#body").val());
+         },
+        error: function() {    //오류났을때 동작
 
-        <button id="add">確認</button>
-        <button id="addtocart" class="hey">この組み合わせで購入</button>
+            alert("There was an error submitting comment");
+        }
+     });
+event.preventDefault();
+                }
+              </script>
 
-        <!--<form action="new.php" method="post" >
-            $_POST["test"]
-            <input type="hidden" name="test" id="test"><br>
-            <input id="addcart" type="submit" value="전송">
-            </form>-->
 
-      </center>
+
+        <!--<button id="add">確認</button>-->
+        <button id="addtocart" class="hey"
+        onclick="location.href='http://160.16.213.240/?add-to-cart=6328&variation_id=<?php echo $ID ?>'"
+        >この組み合わせで購入</button>
+    </center>
+
+
+     
       
         <script>
             window.onload = function(){
@@ -175,149 +203,6 @@
 
 
             }
-
-
-
-            $(function(){
-
-$('#add').on('click',function(){
-    var c1 = $("#option1").attr("class");
-    var c2 = $("#option2").attr("class");
-    var sized = $('input[name=size]:checked').val();
-
-    var i = 6329;   
-
-  var result =(function(){
-    if(c1 == 'k01' && c2 == 'k01' && sized == 's') return i;
-    if(c1 == 'k01' && c2 == 'k02' && sized == 's') return i+1;
-    if(c1 == 'k01' && c2 == 'k03' && sized == 's') return i+2;
-    if(c1 == 'k01' && c2 == 'k04' && sized == 's') return i+3;
-    if(c1 == 'k01' && c2 == 'k05' && sized == 's') return i+4;
-    if(c1 == 'k01' && c2 == 'k06' && sized == 's') return i+5;
-    if(c1 == 'k02' && c2 == 'k01' && sized == 's') return i+6;
-    if(c1 == 'k02' && c2 == 'k02' && sized == 's') return i+7;
-    if(c1 == 'k02' && c2 == 'k03' && sized == 's') return i+8;
-    if(c1 == 'k02' && c2 == 'k04' && sized == 's') return i+9;
-    if(c1 == 'k02' && c2 == 'k05' && sized == 's') return i+10;
-    if(c1 == 'k02' && c2 == 'k06' && sized == 's') return i+11;
-    if(c1 == 'k03' && c2 == 'k01' && sized == 's') return i+12;
-    if(c1 == 'k03' && c2 == 'k02' && sized == 's') return i+13;
-    if(c1 == 'k03' && c2 == 'k03' && sized == 's') return i+14;
-    if(c1 == 'k03' && c2 == 'k04' && sized == 's') return i+15;
-    if(c1 == 'k03' && c2 == 'k05' && sized == 's') return i+16;
-    if(c1 == 'k03' && c2 == 'k06' && sized == 's') return i+17;
-    if(c1 == 'k04' && c2 == 'k01' && sized == 's') return i+18;
-    if(c1 == 'k04' && c2 == 'k02' && sized == 's') return i+19;
-    if(c1 == 'k04' && c2 == 'k03' && sized == 's') return i+20;
-    if(c1 == 'k04' && c2 == 'k04' && sized == 's') return i+21;
-    if(c1 == 'k04' && c2 == 'k05' && sized == 's') return i+22;
-    if(c1 == 'k04' && c2 == 'k06' && sized == 's') return i+23;
-    if(c1 == 'k05' && c2 == 'k01' && sized == 's') return i+24;
-    if(c1 == 'k05' && c2 == 'k02' && sized == 's') return i+25;
-    if(c1 == 'k05' && c2 == 'k03' && sized == 's') return i+26;
-    if(c1 == 'k05' && c2 == 'k04' && sized == 's') return i+27;
-    if(c1 == 'k05' && c2 == 'k05' && sized == 's') return i+28;
-    if(c1 == 'k05' && c2 == 'k06' && sized == 's') return i+29;
-    if(c1 == 'k06' && c2 == 'k01' && sized == 's') return i+30;
-    if(c1 == 'k06' && c2 == 'k02' && sized == 's') return i+31;
-    if(c1 == 'k06' && c2 == 'k03' && sized == 's') return i+32;
-    if(c1 == 'k06' && c2 == 'k04' && sized == 's') return i+33;
-    if(c1 == 'k06' && c2 == 'k05' && sized == 's') return i+34;
-    if(c1 == 'k06' && c2 == 'k06' && sized == 's') return i+35;
-    if(c1 == 'k01' && c2 == 'k01' && sized == 'm') return i+36;
-    if(c1 == 'k01' && c2 == 'k02' && sized == 'm') return i+37;
-    if(c1 == 'k01' && c2 == 'k03' && sized == 'm') return i+38;
-    if(c1 == 'k01' && c2 == 'k04' && sized == 'm') return i+39;
-    if(c1 == 'k01' && c2 == 'k05' && sized == 'm') return i+40;
-    if(c1 == 'k01' && c2 == 'k06' && sized == 'm') return i+41;
-    if(c1 == 'k02' && c2 == 'k01' && sized == 'm') return i+42;
-    if(c1 == 'k02' && c2 == 'k02' && sized == 'm') return i+43;
-    if(c1 == 'k02' && c2 == 'k03' && sized == 'm') return i+44;
-    if(c1 == 'k02' && c2 == 'k04' && sized == 'm') return i+45;
-    if(c1 == 'k02' && c2 == 'k05' && sized == 'm') return i+46;
-    if(c1 == 'k02' && c2 == 'k06' && sized == 'm') return i+47;
-    if(c1 == 'k03' && c2 == 'k01' && sized == 'm') return i+48;
-    if(c1 == 'k03' && c2 == 'k02' && sized == 'm') return i+49;
-    if(c1 == 'k03' && c2 == 'k03' && sized == 'm') return i+50;
-    if(c1 == 'k03' && c2 == 'k04' && sized == 'm') return i+51;
-    if(c1 == 'k03' && c2 == 'k05' && sized == 'm') return i+52;
-    if(c1 == 'k03' && c2 == 'k06' && sized == 'm') return i+53;
-    if(c1 == 'k04' && c2 == 'k01' && sized == 'm') return i+54;
-    if(c1 == 'k04' && c2 == 'k02' && sized == 'm') return i+55;
-    if(c1 == 'k04' && c2 == 'k03' && sized == 'm') return i+56;
-    if(c1 == 'k04' && c2 == 'k04' && sized == 'm') return i+57;
-    if(c1 == 'k04' && c2 == 'k05' && sized == 'm') return i+58;
-    if(c1 == 'k04' && c2 == 'k06' && sized == 'm') return i+59;
-    if(c1 == 'k05' && c2 == 'k01' && sized == 'm') return i+60;
-    if(c1 == 'k05' && c2 == 'k02' && sized == 'm') return i+61;
-    if(c1 == 'k05' && c2 == 'k03' && sized == 'm') return i+62;
-    if(c1 == 'k05' && c2 == 'k04' && sized == 'm') return i+63;
-    if(c1 == 'k05' && c2 == 'k05' && sized == 'm') return i+64;
-    if(c1 == 'k05' && c2 == 'k06' && sized == 'm') return i+65;
-    if(c1 == 'k06' && c2 == 'k01' && sized == 'm') return i+66;
-    if(c1 == 'k06' && c2 == 'k02' && sized == 'm') return i+67;
-    if(c1 == 'k06' && c2 == 'k03' && sized == 'm') return i+68;
-    if(c1 == 'k06' && c2 == 'k04' && sized == 'm') return i+69;
-    if(c1 == 'k06' && c2 == 'k05' && sized == 'm') return i+70;
-    if(c1 == 'k06' && c2 == 'k06' && sized == 'm') return i+71;
-    if(c1 == 'k01' && c2 == 'k01' && sized == 'l') return i+72;
-    if(c1 == 'k01' && c2 == 'k02' && sized == 'l') return i+73;
-    if(c1 == 'k01' && c2 == 'k03' && sized == 'l') return i+74;
-    if(c1 == 'k01' && c2 == 'k04' && sized == 'l') return i+75;
-    if(c1 == 'k01' && c2 == 'k05' && sized == 'l') return i+76;
-    if(c1 == 'k01' && c2 == 'k06' && sized == 'l') return i+77;
-    if(c1 == 'k02' && c2 == 'k01' && sized == 'l') return i+78;
-    if(c1 == 'k02' && c2 == 'k02' && sized == 'l') return i+79;
-    if(c1 == 'k02' && c2 == 'k03' && sized == 'l') return i+80;
-    if(c1 == 'k02' && c2 == 'k04' && sized == 'l') return i+81;
-    if(c1 == 'k02' && c2 == 'k05' && sized == 'l') return i+82;
-    if(c1 == 'k02' && c2 == 'k06' && sized == 'l') return i+83;
-    if(c1 == 'k03' && c2 == 'k01' && sized == 'l') return i+84;
-    if(c1 == 'k03' && c2 == 'k02' && sized == 'l') return i+85;
-    if(c1 == 'k03' && c2 == 'k03' && sized == 'l') return i+86;
-    if(c1 == 'k03' && c2 == 'k04' && sized == 'l') return i+87;
-    if(c1 == 'k03' && c2 == 'k05' && sized == 'l') return i+88;
-    if(c1 == 'k03' && c2 == 'k06' && sized == 'l') return i+89;
-    if(c1 == 'k04' && c2 == 'k01' && sized == 'l') return i+90;
-    if(c1 == 'k04' && c2 == 'k02' && sized == 'l') return i+91;
-    if(c1 == 'k04' && c2 == 'k03' && sized == 'l') return i+92;
-    if(c1 == 'k04' && c2 == 'k04' && sized == 'l') return i+93;
-    if(c1 == 'k04' && c2 == 'k05' && sized == 'l') return i+94;
-    if(c1 == 'k04' && c2 == 'k06' && sized == 'l') return i+95;
-    if(c1 == 'k05' && c2 == 'k01' && sized == 'l') return i+96;
-    if(c1 == 'k05' && c2 == 'k02' && sized == 'l') return i+97;
-    if(c1 == 'k05' && c2 == 'k03' && sized == 'l') return i+98;
-    if(c1 == 'k05' && c2 == 'k04' && sized == 'l') return i+99;
-    if(c1 == 'k05' && c2 == 'k05' && sized == 'l') return i+100;
-    if(c1 == 'k05' && c2 == 'k06' && sized == 'l') return i+101;
-    if(c1 == 'k06' && c2 == 'k01' && sized == 'l') return i+102;
-    if(c1 == 'k06' && c2 == 'k02' && sized == 'l') return i+103;
-    if(c1 == 'k06' && c2 == 'k03' && sized == 'l') return i+104;
-    if(c1 == 'k06' && c2 == 'k04' && sized == 'l') return i+105;
-    if(c1 == 'k06' && c2 == 'k05' && sized == 'l') return i+106;
-    if(c1 == 'k06' && c2 == 'k06' && sized == 'l') return i+107;
-
-
-    return '6329';
-  })();
-
-var d1 = $("#option1").attr("value");
-var d2 = $("#option2").attr("value");
-
-$('#test').attr("value",result);
-
-
-
-
-var sum = parseInt(d1) + parseInt(d2);
-document.getElementById("qty").innerText = sum;
-
-
-$('#addtocart').attr("onclick",'location.href="http://160.16.213.240/?add-to-cart=6328&variation_id='+ result+'"');
-
-});
-
-});
 
 
 </script>
